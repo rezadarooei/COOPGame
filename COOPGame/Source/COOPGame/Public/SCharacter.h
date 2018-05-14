@@ -17,7 +17,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	void MoveForword(float value);
+	void MoveRight(float value);
+	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -25,8 +27,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 public: 
-	void MoveForword(float value);
-	void MoveRight(float value);
+	
 	UPROPERTY(VisibleAnywhere, Category = "MeshComponent")
 		UStaticMeshComponent* MeshComp;
 };

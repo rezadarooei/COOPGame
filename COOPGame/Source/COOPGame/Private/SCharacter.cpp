@@ -31,6 +31,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("MoveFoword",this, &ASCharacter::MoveForword);
 	PlayerInputComponent->BindAxis("MoveRight", this,&ASCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("LookUp", this, &ASCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Turn", this, &ASCharacter::AddControllerYawInput);
 }
 
 void ASCharacter::MoveForword(float value)
