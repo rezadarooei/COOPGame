@@ -8,7 +8,7 @@ ASCharacter::ASCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("MeshCompnent");
 }
 
 // Called when the game starts or when spawned
@@ -29,6 +29,17 @@ void ASCharacter::Tick(float DeltaTime)
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	PlayerInputComponent->BindAxis("MoveFoword",this, &ASCharacter::MoveForword);
+	PlayerInputComponent->BindAxis("MoveRight", this,&ASCharacter::MoveRight);
+}
 
+void ASCharacter::MoveForword(float value)
+{
+	AddMovementInput(GetActorForwardVector(), value);
+}
+
+void ASCharacter::MoveRight(float value)
+{
+	AddMovementInput(GetActorRightVector(), value);
 }
 
