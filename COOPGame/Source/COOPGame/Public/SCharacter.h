@@ -34,8 +34,5 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	
-	UPROPERTY(VisibleAnywhere, Category = "MeshComponent")
-		UStaticMeshComponent* MeshComp;
-
 	
 };
