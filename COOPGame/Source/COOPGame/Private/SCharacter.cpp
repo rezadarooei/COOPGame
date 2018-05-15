@@ -2,6 +2,7 @@
 
 #include "SCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -9,8 +10,11 @@ ASCharacter::ASCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("MeshCompnent");
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>("Spring Arm");
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->bUsePawnControlRotation = true;
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
-	CameraComp->bUsePawnControlRotation = true;
+	CameraComp->SetupAttachment(SpringArm);
 }
 
 // Called when the game starts or when spawned
