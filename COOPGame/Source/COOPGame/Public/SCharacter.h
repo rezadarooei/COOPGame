@@ -25,6 +25,9 @@ protected:
 	UCameraComponent* CameraComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CameraComponent")
 	USpringArmComponent* SpringArm;
+
+	void StartCruch();
+	void EndCrouch();
 	
 public:	
 	// Called every frame
