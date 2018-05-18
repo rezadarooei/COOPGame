@@ -20,6 +20,8 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Component")
 	USkeletalMeshComponent* MeshComp;
+	UFUNCTION(BlueprintCallable,Category="Weapon")
+	void Fire();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
