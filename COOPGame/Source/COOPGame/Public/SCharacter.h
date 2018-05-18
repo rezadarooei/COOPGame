@@ -28,7 +28,6 @@ protected:
 
 	void StartCruch();
 	void EndCrouch();
-	
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
