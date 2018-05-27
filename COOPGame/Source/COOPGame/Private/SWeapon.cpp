@@ -3,6 +3,7 @@
 #include "SWeapon.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Runtime/Engine/Classes/Particles/ParticleSystem.h"
 // Sets default values
 ASWeapon::ASWeapon()
 {
@@ -10,6 +11,7 @@ ASWeapon::ASWeapon()
 	PrimaryActorTick.bCanEverTick = true;
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>("Component");
 	RootComponent = MeshComp;
+	MuzzleScoketName = "MuzzleScoket";
 }
 
 // Called when the game starts or when spawned
@@ -22,25 +24,37 @@ void ASWeapon::BeginPlay()
 void ASWeapon::Fire()
 {
 	//trace the world from pawn eye to crosshair location
-	//Hold Data,It is struct
 	AActor* MyOwner = GetOwner();
 	if (MyOwner) {
-		FHitResult Hit;
+		FHitResult Hit;	//Hold Data,It is struct
+
 		FVector EyeLocation;
 		FRotator EyeRotation;
-		FVector ShotDirection = EyeRotation.Vector;
-		FVector TraceEnd = EyeLocation + (ShotDirection) * 10000;
+		FVector ShotDirection = EyeRotation.Vector();
+		FVector TraceEnd = EyeLocation + (ShotDirection) * 10000; 
+
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+		
 		FCollisionQueryParams QueryPrams;
 		QueryPrams.AddIgnoredActor(MyOwner);
 		QueryPrams.AddIgnoredActor(this);
 		QueryPrams.bTraceComplex = true;
-		if (GetWorld()->LineTraceSingleByChannel(Hit,EyeLocation,TraceEnd,ECollisionChannel::ECC_Visibility)) {
+
+		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd,ECC_Visibility,QueryPrams)) {
 			//Blocking Hit Process damage
 			AActor* HitActor = Hit.GetActor();
-			UGameplayStatics::ApplyPointDamage(HitActor, 20.f, ShotDirection, Hit, MyOwner->GetInstigator(),this,DamageType );
+			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
+			UE_LOG(LogTemp, Warning, TEXT("It is work2"));
+
+			if (ImpactEffect) {
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+				UE_LOG(LogTemp, Warning, TEXT("It is work1"));
+			}
 		}
-		DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.f);
+		DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::Red, true, 1.0f, 0, 1.f);
+		if (MuzzleEffect) {
+			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleScoketName);
+		}
 	}
 
 }
