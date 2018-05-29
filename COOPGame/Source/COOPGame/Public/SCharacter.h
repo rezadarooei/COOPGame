@@ -28,6 +28,17 @@ protected:
 
 	void StartCruch();
 	void EndCrouch();
+	//Default Fov Set in Begin Play
+	float DefaultFov;
+	
+		UPROPERTY(EditDefaultsOnly, Category = "Player")
+		float InterpSpeed;
+		UPROPERTY(EditDefaultsOnly, Category = "Player",meta=(ClampMin=0.0,ClampMax=100))
+	float ZoomedFov;
+	bool bIsWantsZoom;
+	void StartZoom();
+	void EndZoom();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
