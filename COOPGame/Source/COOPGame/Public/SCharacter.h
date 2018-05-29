@@ -42,6 +42,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	TSubclassOf<ASWeapon> StarttWeapon;
 
+	
 	ASWeapon* CurrentWeapon;
 	void fire();
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
