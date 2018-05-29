@@ -5,6 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "SWeapon.h"
 // Sets default values
 ASCharacter::ASCharacter()
 {
@@ -23,6 +24,9 @@ ASCharacter::ASCharacter()
 	//میزان زوم هنگام فشار دادن کلیک راست
 	ZoomedFov = 65.f;
 	InterpSpeed = 20.f;
+	 WeaponScoketAttachName="WeaponScoket";
+	 
+
 }
 
 // Called when the game starts or when spawned
@@ -30,6 +34,15 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	DefaultFov = CameraComp->FieldOfView;
+	//Spawn Default Weapon
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	CurrentWeapon=GetWorld()->SpawnActor<ASWeapon>(StarttWeapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	if (CurrentWeapon) {
+		CurrentWeapon->SetOwner(this);
+		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponScoketAttachName);
+	}
 }
 
 // Called every frame
@@ -61,6 +74,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ASCharacter::StartZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ASCharacter::EndZoom);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::fire);
 }
 //تغییر فاصله چشم تا دوربین
  FVector ASCharacter::GetPawnViewLocation() const
@@ -97,4 +111,11 @@ void ASCharacter::StartZoom()
 void ASCharacter::EndZoom()
 {
 	bIsWantsZoom = false;
+}
+
+void ASCharacter::fire()
+{
+	if (CurrentWeapon) {
+		CurrentWeapon->Fire();
+	}
 }

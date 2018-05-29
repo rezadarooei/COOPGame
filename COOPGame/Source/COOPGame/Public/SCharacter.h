@@ -7,6 +7,7 @@
 #include "SCharacter.generated.h"
 class UCameraComponent;
 class USpringArmComponent;
+class ASWeapon;
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
 {
@@ -38,7 +39,13 @@ protected:
 	bool bIsWantsZoom;
 	void StartZoom();
 	void EndZoom();
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<ASWeapon> StarttWeapon;
 
+	ASWeapon* CurrentWeapon;
+	void fire();
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	FName WeaponScoketAttachName;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
