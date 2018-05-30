@@ -57,7 +57,7 @@ void ASWeapon::Fire()
 		//particle system parameter
 		FVector TraceEndPoint = TraceEnd;
 		//بولین می باشد اگر باشد تریس صورت میگیرد
-		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, ECC_Visibility, QueryPrams)) {
+		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, CollisionWeapon, QueryPrams)) {
 			//Blocking Hit Process damage
 			//موجودی را که مورد اصابت ضربه قرار می گیرد را نشان می دهد. 
 			AActor* HitActor = Hit.GetActor();
