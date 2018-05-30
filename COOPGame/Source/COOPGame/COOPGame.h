@@ -4,3 +4,5 @@
 
 #include "CoreMinimal.h"
 
+#define Surface_FleshDefault    SurfaceType1
+#define Surface_FleshVulnarble  SurfaceType2

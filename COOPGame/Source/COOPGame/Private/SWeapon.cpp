@@ -6,6 +6,8 @@
 #include "Runtime/Engine/Classes/Particles/ParticleSystem.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "COOPGame.h"
 
 //برای نشان دادن دیباگ لاین فقط در صورت خاص
 static int32 DebugWeaponDrawing = 0;
@@ -46,9 +48,12 @@ void ASWeapon::Fire()
 		FCollisionQueryParams QueryPrams;
 		//حذف کلایدر فرد یا در نظر نگرفتن ان
 		QueryPrams.AddIgnoredActor(MyOwner);
+
 		QueryPrams.AddIgnoredActor(this);
 		//به صورت دقیق تر تریس انجام گیرد
 		QueryPrams.bTraceComplex = true;
+
+		QueryPrams.bReturnPhysicalMaterial = true;
 		//particle system parameter
 		FVector TraceEndPoint = TraceEnd;
 		//بولین می باشد اگر باشد تریس صورت میگیرد
@@ -59,8 +64,23 @@ void ASWeapon::Fire()
 			//اسیب دیدگی را نمایش می دهد
 			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
 			//برای ساخت پارتیکل ایفکت تیر خوردن
-			if (ImpactEffect) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+			//physics parameter
+			EPhysicalSurface SurfaceType=UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+
+			UParticleSystem* SelectedEffect = nullptr;
+			switch (SurfaceType)
+			{
+			case Surface_FleshDefault:
+
+			case Surface_FleshVulnarble:
+				SelectedEffect = FleshImpactEffect;		
+				break;
+			default:
+				SelectedEffect = DefaultImpactEffect;
+				break;
+			}
+			if (SelectedEffect) {
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 			}
 			TraceEndPoint = Hit.ImpactPoint;
 
