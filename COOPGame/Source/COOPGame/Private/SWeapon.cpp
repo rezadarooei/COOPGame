@@ -23,9 +23,11 @@ ASWeapon::ASWeapon()
 	//تعریف تفنگ که اسکلت مش هست
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>("Component");
 	RootComponent = MeshComp;
-	//محل در آمدن پارتیکل افکت
+	//محل در آمدن پارتیکل افکت از جسم
 	MuzzleScoketName = "MuzzleScoket";
 	TracerTargetName = "Target";
+
+	BaseDamage = 20.f;
 }
 //شلیک با تفنگ
 void ASWeapon::Fire()
@@ -61,11 +63,15 @@ void ASWeapon::Fire()
 			//Blocking Hit Process damage
 			//موجودی را که مورد اصابت ضربه قرار می گیرد را نشان می دهد. 
 			AActor* HitActor = Hit.GetActor();
+			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+			float ActualDamage = BaseDamage;
+			if (SurfaceType == Surface_FleshVulnarble) {
+				 ActualDamage *= 4;
+			}
 			//اسیب دیدگی را نمایش می دهد
-			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
+			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
 			//برای ساخت پارتیکل ایفکت تیر خوردن
 			//physics parameter
-			EPhysicalSurface SurfaceType=UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 
 			UParticleSystem* SelectedEffect = nullptr;
 			switch (SurfaceType)

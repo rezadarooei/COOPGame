@@ -46,6 +46,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 		TSubclassOf<UCameraShake> FireCamShake;
 	void PlayFireEffect(FVector TraceEnd);
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+
+	float BaseDamage;
 public:	
 	
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
