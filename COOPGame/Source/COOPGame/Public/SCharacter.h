@@ -44,7 +44,8 @@ protected:
 
 	
 	ASWeapon* CurrentWeapon;
-	void fire();
+	void Startfire();
+	void Stopfire();
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	FName WeaponScoketAttachName;
 public:	

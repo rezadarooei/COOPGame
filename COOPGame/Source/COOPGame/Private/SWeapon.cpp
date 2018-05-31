@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "COOPGame.h"
+#include "TimerManager.h"
 
 //برای نشان دادن دیباگ لاین فقط در صورت خاص
 static int32 DebugWeaponDrawing = 0;
@@ -28,7 +29,14 @@ ASWeapon::ASWeapon()
 	TracerTargetName = "Target";
 
 	BaseDamage = 20.f;
+	RateOfFire = 600.f;//rate of fire per minutes
 }
+void ASWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+	TimeBetweenShots = 60 / RateOfFire;
+}
+
 //شلیک با تفنگ
 void ASWeapon::Fire()
 {
@@ -37,56 +45,61 @@ void ASWeapon::Fire()
 	if (MyOwner) {
 		//هیت برای نگهداری اطلاعات است
 		FHitResult Hit;	//Hold Data,It is struct
-		//نقطه ابتدایی تریس
-		FVector EyeLocation;
-		FRotator EyeRotation;
-		//مسیر تیر
-		FVector ShotDirection = EyeRotation.Vector();
-		//پایان trace
-		FVector TraceEnd = EyeLocation + (ShotDirection) * 10000;
-		//فاصله از چشم که تغییر داده شد
-		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-		//پارامترهای کلایدر می باشد در تریس
-		FCollisionQueryParams QueryPrams;
-		//حذف کلایدر فرد یا در نظر نگرفتن ان
-		QueryPrams.AddIgnoredActor(MyOwner);
+		FVector EyeLocation;		//نقطه ابتدایی تریس
 
-		QueryPrams.AddIgnoredActor(this);
-		//به صورت دقیق تر تریس انجام گیرد
+		FRotator EyeRotation;		
+		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);		//فاصله از چشم که تغییر داده شد
+
+		FVector ShotDirection = EyeRotation.Vector();	//مسیر تیر	
+
+		FVector TraceEnd = EyeLocation + (ShotDirection) * 10000;//پایان trace
+
+		FCollisionQueryParams QueryPrams;		//پارامترهای کلایدر می باشد در تریس
+
+		QueryPrams.AddIgnoredActor(MyOwner);		//حذف کلایدر فرد یا در نظر نگرفتن ان
+
+
+		QueryPrams.AddIgnoredActor(this);		//به صورت دقیق تر تریس انجام گیرد
+
 		QueryPrams.bTraceComplex = true;
 
-		QueryPrams.bReturnPhysicalMaterial = true;
-		//particle system parameter
-		FVector TraceEndPoint = TraceEnd;
-		//بولین می باشد اگر باشد تریس صورت میگیرد
-		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, CollisionWeapon, QueryPrams)) {
+		QueryPrams.bReturnPhysicalMaterial = true;		//particle system parameter
+
+		FVector TraceEndPoint = TraceEnd;		//بولین می باشد اگر باشد تریس صورت میگیرد
+
+		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd , CollisionWeapon, QueryPrams)) {
 			//Blocking Hit Process damage
-			//موجودی را که مورد اصابت ضربه قرار می گیرد را نشان می دهد. 
-			AActor* HitActor = Hit.GetActor();
+				AActor* HitActor = Hit.GetActor();			//موجودی را که مورد اصابت ضربه قرار می گیرد را نشان می دهد. 
+
 			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 			float ActualDamage = BaseDamage;
-			if (SurfaceType == Surface_FleshVulnarble) {
-				 ActualDamage *= 4;
-			}
+ 			if (SurfaceType == Surface_FleshVulnarble)
+			{
+ 				 ActualDamage *= 4;
+ 			}
+ 			
 			//اسیب دیدگی را نمایش می دهد
 			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
 			//برای ساخت پارتیکل ایفکت تیر خوردن
 			//physics parameter
 
-			UParticleSystem* SelectedEffect = nullptr;
-			switch (SurfaceType)
-			{
-			case Surface_FleshDefault:
+ 			UParticleSystem* SelectedEffect = nullptr;// متغییر کمکی برای اینکه در هر قسمت چه چیزی رخ می دهد.نشان دهد
+ 			switch (SurfaceType)//برخورد گلوله به هر قسمت چه پارتیک ایفکتی را نشان می دهد.
+ 			{
+ 			case Surface_FleshDefault://اگر به بدن بخورد باید خون بریزد
+ 
+ 			case Surface_FleshVulnarble://اگر به سر بخورد باید خون بریزد
+ 				SelectedEffect = FleshImpactEffect;	
 
-			case Surface_FleshVulnarble:
-				SelectedEffect = FleshImpactEffect;		
-				break;
-			default:
-				SelectedEffect = DefaultImpactEffect;
-				break;
-			}
+ 				break;
+ 			default:
+ 				SelectedEffect = DefaultImpactEffect;//اگر به جای دیگه بخورد چیزی رخ ندهد
+
+ 				break;
+ 			}
 			if (SelectedEffect) {
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+
 			}
 			TraceEndPoint = Hit.ImpactPoint;
 
@@ -96,10 +109,11 @@ void ASWeapon::Fire()
 
 		}
 		PlayFireEffect(TraceEndPoint);
-		
+		LastTimeFired = GetWorld()->TimeSeconds;
 	}
 
 }
+
 
 void ASWeapon::PlayFireEffect(FVector TraceEnd)
 {
@@ -116,6 +130,7 @@ void ASWeapon::PlayFireEffect(FVector TraceEnd)
 			TraccerComp->SetVectorParameter(TracerTargetName, TraceEnd);
 		}
 	}
+	//برای لرزش دوربین حاصل از شلیک
 	APawn* MyyOwner = Cast<APawn>(GetOwner());
 	if (MyyOwner) {
 		APlayerController* PC = Cast<APlayerController>(MyyOwner->GetController());
@@ -124,4 +139,15 @@ void ASWeapon::PlayFireEffect(FVector TraceEnd)
 		}
 	}
 }
+//this is for automatic shot
+void ASWeapon::StartFire()
+{
+	float FirstDelay = FMath::Max(LastTimeFired + TimeBetweenShots - GetWorld()->TimeSeconds,0.f);
+	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots,this,&ASWeapon::Fire, TimeBetweenShots, true,FirstDelay );
+	Fire();
+}
 
+void ASWeapon::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
+}

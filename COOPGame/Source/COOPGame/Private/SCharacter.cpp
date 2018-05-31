@@ -78,7 +78,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ASCharacter::StartZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ASCharacter::EndZoom);
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::fire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::Startfire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::Stopfire);
+
 }
 //تغییر فاصله چشم تا دوربین
  FVector ASCharacter::GetPawnViewLocation() const
@@ -117,9 +119,17 @@ void ASCharacter::EndZoom()
 	bIsWantsZoom = false;
 }
 
-void ASCharacter::fire()
+void ASCharacter::Startfire()
 {
 	if (CurrentWeapon) {
-		CurrentWeapon->Fire();
+		CurrentWeapon->StartFire();
 	}
+}
+
+void ASCharacter::Stopfire()
+{
+	if (CurrentWeapon) {
+		CurrentWeapon->StopFire();
+}
+
 }

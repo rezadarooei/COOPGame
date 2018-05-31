@@ -20,6 +20,7 @@ public:
 
 protected:
 	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 	
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category="Component")
 	USkeletalMeshComponent* MeshComp;
@@ -46,12 +47,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 		TSubclassOf<UCameraShake> FireCamShake;
 	void PlayFireEffect(FVector TraceEnd);
+
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 
 	float BaseDamage;
+
+	void Fire();
+	//automatics fire variables
+	FTimerHandle TimerHandle_TimeBetweenShots;
+
+	float LastTimeFired;
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+//RPM bullet per minutes fire
+	float RateOfFire;
+	//Derived from Rate of fire
+	float TimeBetweenShots;
+
 public:	
-	
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-		void Fire();
+	void StartFire();
+	void StopFire();
 	
 };
