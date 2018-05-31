@@ -6,6 +6,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "SWeapon.h"
+#include "Components/CapsuleComponent.h"
+#include "COOPGame.h"
 // Sets default values
 ASCharacter::ASCharacter()
 {
@@ -16,6 +18,8 @@ ASCharacter::ASCharacter()
 	SpringArm->SetupAttachment(RootComponent);
 	//چرخش اسپرینگ آرم
 	SpringArm->bUsePawnControlRotation = true;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(CollisionWeapon, ECR_Ignore);
+
 	//ایا کاراکتر توانایی نشستن دارد از ai تعریف میشود
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	//تعریف دوربین
@@ -26,7 +30,6 @@ ASCharacter::ASCharacter()
 	InterpSpeed = 20.f;
 	 WeaponScoketAttachName="WeaponScoket";
 	 
-
 }
 
 // Called when the game starts or when spawned

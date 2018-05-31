@@ -6,7 +6,7 @@
 // Sets default values for this component's properties
 USHealthComponent::USHealthComponent()
 {
-	Health = 100.f;
+	DefualtHealth = 100.f;
 }
 
 
@@ -15,7 +15,19 @@ void USHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	AActor* Owner = GetOwner();
+	if (Owner) {
+		Owner->OnTakeAnyDamage.AddDynamic(this, &USHealthComponent::HanldeTakeAnyDamage);
+	}
+	Health = DefualtHealth;
 }
 
+void USHealthComponent::HanldeTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Damage <= 0) {
+		return;
+	}
+	Health = FMath::Clamp(Health-Damage, 0.f, DefualtHealth);
+	UE_LOG(LogTemp, Warning, TEXT("Health is : %f"), Health);
+}
 
