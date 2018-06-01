@@ -8,6 +8,7 @@
 #include "SWeapon.h"
 #include "Components/CapsuleComponent.h"
 #include "COOPGame.h"
+#include "SHealthComponent.h"
 // Sets default values
 ASCharacter::ASCharacter()
 {
@@ -25,6 +26,8 @@ ASCharacter::ASCharacter()
 	//تعریف دوربین
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComp->SetupAttachment(SpringArm);
+
+	HealthComp = CreateDefaultSubobject<USHealthComponent>("HealthComponent");
 	//میزان زوم هنگام فشار دادن کلیک راست
 	ZoomedFov = 65.f;
 	InterpSpeed = 20.f;
@@ -49,6 +52,7 @@ void ASCharacter::BeginPlay()
 		//اتصال به جز اصلی 
 		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponScoketAttachName);
 	}
+	HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 	
 }
 
@@ -135,4 +139,19 @@ void ASCharacter::Stopfire()
 		CurrentWeapon->StopFire();
 }
 
+}
+
+void ASCharacter::OnHealthChanged(USHealthComponent* HealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	
+		if (Health <= 0 && !bDied) {
+			//Died
+			bDied = true;
+			GetMovementComponent()->StopMovementImmediately();
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			DetachFromControllerPendingDestroy();
+			UE_LOG(LogTemp, Warning, TEXT("you died"));
+			SetLifeSpan(10.0f);
+		}
+	
 }
