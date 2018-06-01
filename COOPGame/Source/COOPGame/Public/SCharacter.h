@@ -49,7 +49,10 @@ protected:
 	void Stopfire();
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	FName WeaponScoketAttachName;
-	
+
+
+	UPROPERTY(VisibleAnywhere, Category = "Player")
+
 	USHealthComponent* HealthComp;
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* HealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
