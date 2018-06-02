@@ -33,6 +33,8 @@ ASWeapon::ASWeapon()
 	BaseDamage = 20.f;
 	RateOfFire = 600.f;//rate of fire per minutes
 	SetReplicates(true);//replicate weapon on the client sideتفنگ را در قسمت کلاینت نیز قرار می دهد
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
 }
 void ASWeapon::BeginPlay()
 {
@@ -73,12 +75,12 @@ void ASWeapon::Fire()
 		QueryPrams.bReturnPhysicalMaterial = true;		//particle system parameter
 
 		FVector TraceEndPoint = TraceEnd;		//بولین می باشد اگر باشد تریس صورت میگیرد
-
+		EPhysicalSurface SurfaceType = SurfaceType_Default;
 		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd , CollisionWeapon, QueryPrams)) {
 			//Blocking Hit Process damage
 				AActor* HitActor = Hit.GetActor();			//موجودی را که مورد اصابت ضربه قرار می گیرد را نشان می دهد. 
 
-			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+			 SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 			float ActualDamage = BaseDamage;
  			if (SurfaceType == Surface_FleshVulnarble)
 			{
@@ -89,25 +91,8 @@ void ASWeapon::Fire()
 			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), this, DamageType);
 			//برای ساخت پارتیکل ایفکت تیر خوردن
 			//physics parameter
-
- 			UParticleSystem* SelectedEffect = nullptr;// متغییر کمکی برای اینکه در هر قسمت چه چیزی رخ می دهد.نشان دهد
- 			switch (SurfaceType)//برخورد گلوله به هر قسمت چه پارتیک ایفکتی را نشان می دهد.
- 			{
- 			case Surface_FleshDefault://اگر به بدن بخورد باید خون بریزد
- 
- 			case Surface_FleshVulnarble://اگر به سر بخورد باید خون بریزد
- 				SelectedEffect = FleshImpactEffect;	
-
- 				break;
- 			default:
- 				SelectedEffect = DefaultImpactEffect;//اگر به جای دیگه بخورد چیزی رخ ندهد
-
- 				break;
- 			}
-			if (SelectedEffect) {
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
-
-			}
+			PlayImpactEffect(SurfaceType, Hit.ImpactPoint);
+ 			
 			TraceEndPoint = Hit.ImpactPoint;
 
 		}
@@ -118,6 +103,8 @@ void ASWeapon::Fire()
 		PlayFireEffect(TraceEndPoint);
 		if (Role == ROLE_Authority) {
 			HitScanTrace.TraceTo = TraceEndPoint;
+			HitScanTrace.SurfaceType = SurfaceType;
+
 		}
 		LastTimeFired = GetWorld()->TimeSeconds;
 	}
@@ -128,7 +115,7 @@ void ASWeapon::OnRep_HitScanTrace()
 {
 	//Play Cosmetic FX
 	PlayFireEffect(HitScanTrace.TraceTo);
-
+	PlayImpactEffect(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
 }
 
 //Implementation
@@ -169,6 +156,32 @@ void ASWeapon::PlayFireEffect(FVector TraceEnd)
 		}
 	}
 }
+
+void ASWeapon::PlayImpactEffect(EPhysicalSurface SurfaceType,FVector ImpactPoint)
+{
+	UParticleSystem* SelectedEffect = nullptr;// متغییر کمکی برای اینکه در هر قسمت چه چیزی رخ می دهد.نشان دهد
+	switch (SurfaceType)//برخورد گلوله به هر قسمت چه پارتیک ایفکتی را نشان می دهد.
+	{
+	case Surface_FleshDefault://اگر به بدن بخورد باید خون بریزد
+
+	case Surface_FleshVulnarble://اگر به سر بخورد باید خون بریزد
+		SelectedEffect = FleshImpactEffect;
+
+		break;
+	default:
+		SelectedEffect = DefaultImpactEffect;//اگر به جای دیگه بخورد چیزی رخ ندهد
+
+		break;
+	}
+	if (SelectedEffect) {
+		FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleScoketName);
+		FVector ShotDirection = ImpactPoint - MuzzleLocation;
+		ShotDirection.Normalize();
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, ImpactPoint, ShotDirection.Rotation());
+
+	}
+}
+
 //this is for automatic shot
 void ASWeapon::StartFire()
 {

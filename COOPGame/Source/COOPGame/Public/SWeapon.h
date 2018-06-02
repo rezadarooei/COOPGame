@@ -14,7 +14,7 @@ struct FhitScanTrace
 {
 	GENERATED_BODY()
 		UPROPERTY()
-	FVector_NetQuantize TraceFrom;
+		TEnumAsByte<EPhysicalSurface> SurfaceType;
 	UPROPERTY()
 	FVector_NetQuantize TraceTo;
 
@@ -58,6 +58,7 @@ protected:
 		TSubclassOf<UCameraShake> FireCamShake;
 	void PlayFireEffect(FVector TraceEnd);
 
+	void PlayImpactEffect(EPhysicalSurface SurfaceType,FVector ImpactPoint);
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float BaseDamage;
 
