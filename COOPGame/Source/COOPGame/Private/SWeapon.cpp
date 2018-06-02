@@ -41,6 +41,10 @@ void ASWeapon::BeginPlay()
 //شلیک با تفنگ
 void ASWeapon::Fire()
 {
+	if (Role < ROLE_Authority) {
+		ServerFire();
+		
+	}
 	//trace the world from pawn eye to crosshair location
 	AActor* MyOwner = GetOwner();
 	if (MyOwner) {
@@ -113,6 +117,18 @@ void ASWeapon::Fire()
 		LastTimeFired = GetWorld()->TimeSeconds;
 	}
 
+}
+//Implementation
+
+void ASWeapon::ServerFire_Implementation()
+{
+	Fire();
+}
+//it needs validate because we use validation in server fire
+
+bool ASWeapon::ServerFire_Validate()
+{
+	return true;
 }
 
 

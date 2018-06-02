@@ -49,10 +49,11 @@ protected:
 	void PlayFireEffect(FVector TraceEnd);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-
 	float BaseDamage;
 
 	void Fire();
+	UFUNCTION(Server,Reliable,WithValidation)
+	void ServerFire();
 	//automatics fire variables
 	FTimerHandle TimerHandle_TimeBetweenShots;
 

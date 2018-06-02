@@ -164,5 +164,6 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComponent, floa
 //this function shows how we want replicate something
 void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//before that we told in current weapon in h files we want to replicated
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 }
