@@ -8,7 +8,17 @@
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
+//Contains information Hit Scan weapon Line Trace
+USTRUCT()
+struct FhitScanTrace
+{
+	GENERATED_BODY()
+		UPROPERTY()
+	FVector_NetQuantize TraceFrom;
+	UPROPERTY()
+	FVector_NetQuantize TraceTo;
 
+};
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
 {
@@ -52,8 +62,7 @@ protected:
 	float BaseDamage;
 
 	void Fire();
-	UFUNCTION(Server,Reliable,WithValidation)
-	void ServerFire();
+	
 	//automatics fire variables
 	FTimerHandle TimerHandle_TimeBetweenShots;
 
@@ -64,6 +73,14 @@ protected:
 	//Derived from Rate of fire
 	float TimeBetweenShots;
 
+	//network Parameters
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
+	UPROPERTY(ReplicatedUsing=OnRep_HitScanTrace)//Triggered a function when valid
+	FhitScanTrace HitScanTrace;
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 public:	
 	void StartFire();
 	void StopFire();

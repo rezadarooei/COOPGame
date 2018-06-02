@@ -9,6 +9,8 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "COOPGame.h"
 #include "TimerManager.h"
+#include "Net/UnrealNetwork.h"
+
 
 //برای نشان دادن دیباگ لاین فقط در صورت خاص
 static int32 DebugWeaponDrawing = 0;
@@ -114,10 +116,21 @@ void ASWeapon::Fire()
 
 		}
 		PlayFireEffect(TraceEndPoint);
+		if (Role == ROLE_Authority) {
+			HitScanTrace.TraceTo = TraceEndPoint;
+		}
 		LastTimeFired = GetWorld()->TimeSeconds;
 	}
 
 }
+
+void ASWeapon::OnRep_HitScanTrace()
+{
+	//Play Cosmetic FX
+	PlayFireEffect(HitScanTrace.TraceTo);
+
+}
+
 //Implementation
 
 void ASWeapon::ServerFire_Implementation()
@@ -167,4 +180,12 @@ void ASWeapon::StartFire()
 void ASWeapon::StopFire()
 {
 	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
+}
+//this function shows how we want replicate something
+
+void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//before that we told in current weapon in h files we want to replicated
+	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace,COND_SkipOwner);
 }
