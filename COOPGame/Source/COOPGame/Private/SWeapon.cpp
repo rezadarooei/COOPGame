@@ -30,6 +30,7 @@ ASWeapon::ASWeapon()
 
 	BaseDamage = 20.f;
 	RateOfFire = 600.f;//rate of fire per minutes
+	SetReplicates(true);//replicate weapon on the client sideتفنگ را در قسمت کلاینت نیز قرار می دهد
 }
 void ASWeapon::BeginPlay()
 {

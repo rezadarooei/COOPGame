@@ -33,17 +33,19 @@ protected:
 	//Default Fov Set in Begin Play
 	float DefaultFov;
 	
-		UPROPERTY(EditDefaultsOnly, Category = "Player")
-		float InterpSpeed;
-		UPROPERTY(EditDefaultsOnly, Category = "Player",meta=(ClampMin=0.0,ClampMax=100))
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	float InterpSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player",meta=(ClampMin=0.0,ClampMax=100))
 	float ZoomedFov;
+
 	bool bIsWantsZoom;
 	void StartZoom();
 	void EndZoom();
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	TSubclassOf<ASWeapon> StarttWeapon;
 
-	
+	UPROPERTY(Replicated)//??? ???? ??? ?? ???? ?????? ??????? ???
 	ASWeapon* CurrentWeapon;
 	void Startfire();
 	void Stopfire();
@@ -55,7 +57,7 @@ protected:
 
 	USHealthComponent* HealthComp;
 	UFUNCTION()
-	void OnHealthChanged(USHealthComponent* HealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	void OnHealthChanged(USHealthComponent* OwningHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	UPROPERTY(BlueprintReadOnly,Category="Player")
 	bool bDied;
 public:	

@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "COOPGame.h"
 #include "SHealthComponent.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 ASCharacter::ASCharacter()
 {
@@ -40,19 +41,24 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	DefaultFov = CameraComp->FieldOfView;
-	///Spawn Default Weapon(برای ظاهر شدن تفنگ در دست بازیکن)
-	//پارامتر ظاهر شدن
-	FActorSpawnParameters SpawnParams;
-	//همواره ظاهر می شود.
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	//ساخت تفنگ باید به این نکته توجه کرد در ساخت حتما از <tsubclass of> استفده میشود
-	CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StarttWeapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-	if (CurrentWeapon) {
-		CurrentWeapon->SetOwner(this);
-		//اتصال به جز اصلی 
-		CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponScoketAttachName);
-	}
 	HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+	//only runs in server Side
+	if (Role == ROLE_Authority) {
+		///Spawn Default Weapon(برای ظاهر شدن تفنگ در دست بازیکن)
+
+		//پارامتر ظاهر شدن
+		FActorSpawnParameters SpawnParams;
+		//همواره ظاهر می شود.
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		//ساخت تفنگ باید به این نکته توجه کرد در ساخت حتما از <tsubclass of> استفده میشود
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(StarttWeapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		if (CurrentWeapon) {
+			CurrentWeapon->SetOwner(this);
+			//اتصال به جز اصلی 
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponScoketAttachName);
+		}
+	}
+	
 	
 }
 
@@ -154,4 +160,9 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComponent, floa
 			SetLifeSpan(10.0f);
 		}
 	
+}
+//this function shows how we want replicate something
+void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 }
